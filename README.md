@@ -2,6 +2,8 @@
 
 Application Angular de recherche de régions françaises et affichage des communes.
 
+🔗 **Démo :** [natixis-geo-test.vercel.app](https://natixis-geo-test.vercel.app)
+
 ## Stack
 
 - Angular 21 (signals, standalone)
