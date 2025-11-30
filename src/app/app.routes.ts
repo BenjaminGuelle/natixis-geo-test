@@ -15,5 +15,9 @@ export const routes: Routes = [
     path: 'departments/:code/municipalities',
     loadComponent: () => import('./features/municipality-list/municipality-list')
       .then(c => c.MunicipalityList)
+  },
+  {
+    path: '**',
+    redirectTo: 'search'
   }
 ];

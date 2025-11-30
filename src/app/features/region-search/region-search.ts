@@ -2,7 +2,7 @@ import { Component, inject, Signal, signal, WritableSignal } from '@angular/core
 import { GeoApiService } from '../../core/services/geo-api.service';
 import { RegionModel } from '../../core/domain/models/region.model';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime, of, switchMap, tap } from 'rxjs';
+import { catchError, debounceTime, finalize, of, switchMap, tap } from 'rxjs';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { InputSearch } from './input-search/input-search';
 import { DepartmentModel } from '../../core/domain/models/department.model';
@@ -24,6 +24,7 @@ export class RegionSearch {
   searchControl: FormControl<string | null> = new FormControl('');
   loading: WritableSignal<boolean> = signal(false);
   selectedRegion: WritableSignal<RegionModel | null> = signal<RegionModel | null>(null);
+  readonly error: WritableSignal<string | null> = signal<string | null>(null);
 
   suggestions: Signal<RegionModel[]> = toSignal(
     this.searchControl.valueChanges.pipe(
@@ -49,7 +50,11 @@ export class RegionSearch {
       switchMap((region: RegionModel | null) =>
         region
           ? this.#geoService.getDepartmentsByRegion(region.code).pipe(
-            tap(() => this.loading.set(false))
+            catchError(() => {
+              this.error.set('Impossible de charger les départements');
+              return of([]);
+            }),
+            finalize(() => this.loading.set(false))
           )
           : of([])
       )

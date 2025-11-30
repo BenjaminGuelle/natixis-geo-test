@@ -106,4 +106,21 @@ describe('MunicipalityList', () => {
     expect(component.municipalities()[0].name).toBe('Caen');
     expect(component.municipalities()[2].name).toBe('Ablon');
   });
+
+  it('should display error when API fails', () => {
+    fixture = TestBed.createComponent(MunicipalityList);
+    component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
+
+    fixture.detectChanges();
+
+    const deptReq: TestRequest = httpMock.expectOne('https://geo.api.gouv.fr/departements/14');
+    deptReq.flush(mockDepartment);
+
+    const municipalitiesReq: TestRequest = httpMock.expectOne('https://geo.api.gouv.fr/departements/14/communes');
+    municipalitiesReq.flush('Error', { status: 500, statusText: 'Server Error' });
+
+    expect(component.error()).toBe('Impossible de charger les communes');
+    expect(component.municipalities().length).toBe(0);
+  });
 });

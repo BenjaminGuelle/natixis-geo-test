@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, WritableSignal, Signal } from '@angular/core';
 import { ActivatedRoute, ParamMap, RouterLink } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { switchMap, map, tap, filter } from 'rxjs';
+import { switchMap, map, tap, filter, catchError, of, finalize } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { GeoApiService } from '../../core/services/geo-api.service';
@@ -29,6 +29,7 @@ export class MunicipalityList {
   loading: WritableSignal<boolean> = signal(false);
   sortField: WritableSignal<SortField> = signal<SortField>('name');
   sortOrder: WritableSignal<SortOrder> = signal<SortOrder>('none');
+  readonly error: WritableSignal<string | null> = signal<string | null>(null);
 
   departmentCode: Signal<string> = toSignal(
     this.#route.paramMap.pipe(
@@ -55,7 +56,11 @@ export class MunicipalityList {
       tap(() => this.loading.set(true)),
       switchMap((code: string) =>
         this.#geoService.getMunicipalitiesByDepartment(code).pipe(
-          tap(() => this.loading.set(false))
+          catchError(() => {
+            this.error.set('Impossible de charger les communes');
+            return of([]);
+          }),
+          finalize(() => this.loading.set(false)),
         )
       )
     ),
