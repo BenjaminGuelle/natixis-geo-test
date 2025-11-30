@@ -16,7 +16,30 @@
                data-testid="municipality-filter"
         />
 
-        <p class="text-gray-500 mb-4">{{ municipalities().length }} communes</p>
+        <div class="flex justify-between items-center">
+            <p class="text-gray-500 text-sm">{{ municipalities().length }} communes</p>
+
+            <div class="inline-flex rounded-lg border border-gray-300 overflow-hidden">
+                <button (click)="toggleSort('name')"
+                        [class]="sortField() === 'name' && sortOrder() !== 'none' ? 'bg-gray-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                        class="px-4 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer flex items-center gap-2"
+                >
+                    Nom
+                    <span [class.opacity-0]="sortField() !== 'name' || sortOrder() === 'none'" class="text-xs w-3">
+                        {{ sortOrder() === 'asc' ? '▲' : '▼' }}
+                    </span>
+                </button>
+                <button (click)="toggleSort('population')"
+                        [class]="sortField() === 'population' && sortOrder() !== 'none' ? 'bg-gray-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                        class="px-4 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer flex items-center gap-2 border-l border-gray-300"
+                >
+                    Population
+                    <span [class.opacity-0]="sortField() !== 'population' || sortOrder() === 'none'" class="text-xs w-3">
+                        {{ sortOrder() === 'asc' ? '▲' : '▼' }}
+                    </span>
+                </button>
+            </div>
+        </div>
     }
 
 </div>

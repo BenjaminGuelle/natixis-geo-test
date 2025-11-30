@@ -7,6 +7,14 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { GeoApiService } from '../../core/services/geo-api.service';
 import { MunicipalityModel } from '../../core/domain/models/municipality.model';
 
+type SortField = 'name' | 'population';
+type SortOrder = 'asc' | 'desc' | 'none';
+const SORT_ORDER_CYCLE: Record<SortOrder, SortOrder> = {
+  none: 'asc',
+  asc: 'desc',
+  desc: 'none'
+};
+
 @Component({
   selector: 'app-municipality-list',
   imports: [RouterLink, DecimalPipe, ScrollingModule],
@@ -19,6 +27,8 @@ export class MunicipalityList {
 
   filterQuery: WritableSignal<string> = signal('');
   loading: WritableSignal<boolean> = signal(false);
+  sortField: WritableSignal<SortField> = signal<SortField>('name');
+  sortOrder: WritableSignal<SortOrder> = signal<SortOrder>('none');
 
   departmentCode: Signal<string> = toSignal(
     this.#route.paramMap.pipe(
@@ -40,16 +50,48 @@ export class MunicipalityList {
     { initialValue: [] }
   );
 
-  municipalities: Signal<MunicipalityModel[]> = computed(() => {
+  readonly municipalities: Signal<MunicipalityModel[]> = computed(() => {
     const query: string = this.filterQuery().toLowerCase().trim();
-    const all: MunicipalityModel[] | any[] = this.#allMunicipalities();
+    const field: SortField = this.sortField();
+    const order: SortOrder = this.sortOrder();
 
-    if (!query) return all;
+    let municipalities: MunicipalityModel[] = this.#allMunicipalities() ?? [];
 
-    return all.filter((municipality: MunicipalityModel) => municipality.name.toLowerCase().includes(query));
+    if (query) {
+      municipalities = municipalities.filter(municipality => municipality.name.toLowerCase().includes(query));
+    }
+
+    if (order !== 'none') {
+      municipalities = this.#sortMunicipalities(municipalities, field, order);
+    }
+
+    return municipalities;
   });
+
+  toggleSort(field: SortField): void {
+    if (this.sortField() === field) {
+      this.sortOrder.set(SORT_ORDER_CYCLE[this.sortOrder()]);
+    } else {
+      this.sortField.set(field);
+      this.sortOrder.set('asc');
+    }
+  }
+
 
   trackByCode(_index: number, municipality: MunicipalityModel): string {
     return municipality.code;
+  }
+
+  #sortMunicipalities(
+    municipalities: MunicipalityModel[],
+    field: SortField,
+    order: SortOrder
+  ): MunicipalityModel[] {
+    return [...municipalities].sort((a, b) => {
+      const comparison: number = field === 'name'
+        ? a.name.localeCompare(b.name)
+        : (a.population ?? 0) - (b.population ?? 0);
+      return order === 'asc' ? comparison : -comparison;
+    });
   }
 }
