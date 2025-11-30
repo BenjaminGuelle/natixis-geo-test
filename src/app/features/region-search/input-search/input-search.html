@@ -1,0 +1,26 @@
+<div class="relative w-full">
+    <input type="text"
+           [formControl]="control()"
+           [placeholder]="placeholder()"
+           (focus)="onFocus()"
+           (input)="onFocus()"
+           (keydown)="onKeydown($event)"
+           class="border border-gray-500 rounded px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-gray-300"
+           data-testid="region-input"
+    />
+
+    @if (showDropdown()) {
+        <ul class="absolute z-10 w-full mt-1 bg-white border border-gray-500 rounded shadow-lg max-h-60 overflow-auto"
+            data-testid="suggestions"
+        >
+            @for (option of options(); track $index; let i = $index) {
+                <li (click)="selectOption(option)"
+                    [class.bg-gray-200]="i === activeIndex()"
+                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
+                >
+                    {{ displayWith()(option) }}
+                </li>
+            }
+        </ul>
+    }
+</div>

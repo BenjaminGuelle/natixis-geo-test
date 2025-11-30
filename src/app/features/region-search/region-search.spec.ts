@@ -33,7 +33,7 @@ describe('RegionSearch', () => {
       { code: '75', nom: 'Nouvelle-Aquitaine' }
     ];
 
-    component.query.set('norm');
+    component.searchControl.setValue('norm');
 
     await new Promise(resolve => setTimeout(resolve, 350));
 

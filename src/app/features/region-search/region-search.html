@@ -1,21 +1,25 @@
-<div class="p-4">
-    <h1 class="text-2xl font-bold mb-4">Recherche de région</h1>
+<div class="p-4 max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-6">Recherche de région</h1>
 
-    <input type="text"
-           [value]="query()"
-           (input)="query.set($any($event.target).value)"
-           placeholder="Tapez le nom d'une région..."
-           class="border rounded px-4 py-2 w-full max-w-md"
+    <input-search [control]="searchControl"
+                  [options]="suggestions()"
+                  [displayWith]="displayRegion"
+                  [placeholder]="'Recherchez une région...'"
+                  (selected)="onSelectRegion($event)"
     />
 
-    <div class="mt-4">
-        <p class="text-sm text-gray-500">Query: {{ query() }}</p>
-        <p class="text-sm text-gray-500">Suggestions: {{ suggestions().length }}</p>
-    </div>
-
-    <ul class="mt-4 space-y-2">
-        @for (region of suggestions(); track region.code) {
-            <li class="p-2 bg-gray-100 rounded">{{ region.name }}</li>
-        }
-    </ul>
+    @if (selectedRegion()) {
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold mb-4">
+                Départements de {{ selectedRegion()?.name }}
+            </h2>
+            <ul class="space-y-2" data-testid="departments-list">
+                @for (dept of departments(); track dept.code) {
+                    <li class="p-3 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer transition-colors duration-300 ease-in-out">
+                        <span class="font-medium">{{ dept.code }}</span> - {{ dept.name }}
+                    </li>
+                }
+            </ul>
+        </div>
+    }
 </div>
