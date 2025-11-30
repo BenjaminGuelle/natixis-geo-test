@@ -4,7 +4,14 @@
     </a>
 
     <h1 class="text-2xl font-bold">
-        Communes du département {{ departmentCode() }}
+        @if (department()) {
+            Communes de {{ department()?.name }}
+            <span class="text-gray-500 font-normal text-lg ml-2">
+              — {{ totalPopulation() | number }} habitants
+            </span>
+        } @else {
+            Communes du département {{ departmentCode() }}
+        }
     </h1>
 
     @if (!loading()) {

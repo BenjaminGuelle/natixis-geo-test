@@ -78,4 +78,22 @@ describe('GeoApiService', () => {
     expect(req.request.method).toBe('GET');
     req.flush(mockDepartments);
   });
+
+  it('should get department by code', () => {
+    const mockDepartment: DepartmentDto = {
+      code: '14',
+      nom: 'Calvados',
+      codeRegion: '28'
+    };
+
+    service.getDepartmentByCode('14').subscribe(department => {
+      expect(department.code).toBe('14');
+      expect(department.name).toBe('Calvados');
+      expect(department.regionCode).toBe('28');
+    });
+
+    const req: TestRequest = httpMock.expectOne('https://geo.api.gouv.fr/departements/14');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockDepartment);
+  });
 });

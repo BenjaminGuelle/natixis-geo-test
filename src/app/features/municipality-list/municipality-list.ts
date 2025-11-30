@@ -37,6 +37,18 @@ export class MunicipalityList {
     { initialValue: '' }
   );
 
+  department = toSignal(
+    toObservable(this.departmentCode).pipe(
+      filter(Boolean),
+      switchMap(code => this.#geoService.getDepartmentByCode(code))
+    )
+  );
+
+  totalPopulation: Signal<number> = computed(() => {
+    const municipalities: MunicipalityModel[] = this.#allMunicipalities() ?? [];
+    return municipalities.reduce((sum, m) => sum + (m.population ?? 0), 0);
+  });
+
   #allMunicipalities = toSignal(
     toObservable(this.departmentCode).pipe(
       filter(Boolean),
@@ -50,7 +62,7 @@ export class MunicipalityList {
     { initialValue: [] }
   );
 
-  readonly municipalities: Signal<MunicipalityModel[]> = computed(() => {
+  municipalities: Signal<MunicipalityModel[]> = computed(() => {
     const query: string = this.filterQuery().toLowerCase().trim();
     const field: SortField = this.sortField();
     const order: SortOrder = this.sortOrder();

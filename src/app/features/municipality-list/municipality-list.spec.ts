@@ -4,12 +4,18 @@ import { provideHttpClientTesting, HttpTestingController, TestRequest } from '@a
 import { provideRouter, ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 import { MunicipalityList } from './municipality-list';
-import { MunicipalityDto } from '../../core/domain/dtos/geo-api.dto';
+import { MunicipalityDto, DepartmentDto } from '../../core/domain/dtos/geo-api.dto';
 
 describe('MunicipalityList', () => {
   let component: MunicipalityList;
   let fixture: ComponentFixture<MunicipalityList>;
   let httpMock: HttpTestingController;
+
+  const mockDepartment: DepartmentDto = {
+    code: '14',
+    nom: 'Calvados',
+    codeRegion: '28'
+  };
 
   const mockMunicipalities: MunicipalityDto[] = [
     { code: '14001', nom: 'Ablon', codeDepartement: '14', population: 1177 },
@@ -38,8 +44,12 @@ describe('MunicipalityList', () => {
     httpMock = TestBed.inject(HttpTestingController);
 
     fixture.detectChanges();
-    const req: TestRequest = httpMock.expectOne('https://geo.api.gouv.fr/departements/14/communes');
-    req.flush(mockMunicipalities);
+
+    const deptReq: TestRequest = httpMock.expectOne('https://geo.api.gouv.fr/departements/14');
+    deptReq.flush(mockDepartment);
+
+    const municipalitiesReq: TestRequest = httpMock.expectOne('https://geo.api.gouv.fr/departements/14/communes');
+    municipalitiesReq.flush(mockMunicipalities);
   });
 
   afterEach(() => {
@@ -50,8 +60,16 @@ describe('MunicipalityList', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should load department name', () => {
+    expect(component.department()?.name).toBe('Calvados');
+  });
+
   it('should load municipalities from API', () => {
     expect(component.municipalities().length).toBe(3);
+  });
+
+  it('should calculate total population', () => {
+    expect(component.totalPopulation()).toBe(109877);
   });
 
   it('should filter municipalities by name', () => {
@@ -72,5 +90,20 @@ describe('MunicipalityList', () => {
     component.filterQuery.set('');
 
     expect(component.municipalities().length).toBe(3);
+  });
+
+  it('should sort by name ascending', () => {
+    component.toggleSort('name');
+
+    expect(component.municipalities()[0].name).toBe('Ablon');
+    expect(component.municipalities()[2].name).toBe('Caen');
+  });
+
+  it('should sort by population descending', () => {
+    component.toggleSort('population');
+    component.toggleSort('population');
+
+    expect(component.municipalities()[0].name).toBe('Caen');
+    expect(component.municipalities()[2].name).toBe('Ablon');
   });
 });
