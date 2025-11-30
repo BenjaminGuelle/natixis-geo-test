@@ -23,9 +23,8 @@
             } @else {
                 <ul class="space-y-2" data-testid="departments-list">
                     @for (dept of departments(); track dept.code) {
-                        <li
-                                (click)="onSelectDepartment(dept)"
-                                class="p-3 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer transition-colors"
+                        <li (click)="onSelectDepartment(dept)"
+                            class="p-3 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer transition-colors"
                         >
                             <span class="font-medium">{{ dept.code }}</span> - {{ dept.name }}
                         </li>

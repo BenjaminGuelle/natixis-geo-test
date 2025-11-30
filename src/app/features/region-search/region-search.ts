@@ -2,7 +2,7 @@ import { Component, inject, Signal, signal, WritableSignal } from '@angular/core
 import { GeoApiService } from '../../core/services/geo-api.service';
 import { RegionModel } from '../../core/domain/models/region.model';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime, filter, of, switchMap, tap } from 'rxjs';
+import { debounceTime, of, switchMap, tap } from 'rxjs';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { InputSearch } from './input-search/input-search';
 import { DepartmentModel } from '../../core/domain/models/department.model';
@@ -27,6 +27,12 @@ export class RegionSearch {
 
   suggestions: Signal<RegionModel[]> = toSignal(
     this.searchControl.valueChanges.pipe(
+      tap((value: string | null) => {
+        const selected: RegionModel | null = this.selectedRegion();
+        if (selected && value !== selected.name) {
+          this.selectedRegion.set(null);
+        }
+      }),
       debounceTime(300),
       switchMap((search: string | null) =>
         search && search.trim().length > 0
@@ -50,15 +56,6 @@ export class RegionSearch {
     ),
     { initialValue: [] }
   );
-
-  constructor() {
-    this.searchControl.valueChanges.subscribe(value => {
-      const selected: RegionModel | null = this.selectedRegion();
-      if (selected && value !== selected.name) {
-        this.selectedRegion.set(null);
-      }
-    });
-  }
 
   displayRegion: (region: RegionModel) => string = (region: RegionModel): string => region.name;
 
