@@ -1,0 +1,21 @@
+<div class="p-4">
+    <h1 class="text-2xl font-bold mb-4">Recherche de région</h1>
+
+    <input type="text"
+           [value]="query()"
+           (input)="query.set($any($event.target).value)"
+           placeholder="Tapez le nom d'une région..."
+           class="border rounded px-4 py-2 w-full max-w-md"
+    />
+
+    <div class="mt-4">
+        <p class="text-sm text-gray-500">Query: {{ query() }}</p>
+        <p class="text-sm text-gray-500">Suggestions: {{ suggestions().length }}</p>
+    </div>
+
+    <ul class="mt-4 space-y-2">
+        @for (region of suggestions(); track region.code) {
+            <li class="p-2 bg-gray-100 rounded">{{ region.name }}</li>
+        }
+    </ul>
+</div>
