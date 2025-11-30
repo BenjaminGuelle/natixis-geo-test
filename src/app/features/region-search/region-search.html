@@ -13,15 +13,25 @@
             <h2 class="text-xl font-semibold mb-4">
                 Départements de {{ selectedRegion()?.name }}
             </h2>
-            <ul class="space-y-2" data-testid="departments-list">
-                @for (dept of departments(); track dept.code) {
-                    <li (click)="onSelectDepartment(dept)"
-                        class="p-3 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer transition-colors duration-300 ease-in-out"
-                    >
-                        <span class="font-medium">{{ dept.code }}</span> - {{ dept.name }}
-                    </li>
-                }
-            </ul>
+
+            @if (loading()) {
+                <div class="space-y-2">
+                    @for (i of [1, 2, 3, 4, 5]; track i) {
+                        <div class="p-3 bg-gray-100 rounded animate-pulse h-12"></div>
+                    }
+                </div>
+            } @else {
+                <ul class="space-y-2" data-testid="departments-list">
+                    @for (dept of departments(); track dept.code) {
+                        <li
+                                (click)="onSelectDepartment(dept)"
+                                class="p-3 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer transition-colors"
+                        >
+                            <span class="font-medium">{{ dept.code }}</span> - {{ dept.name }}
+                        </li>
+                    }
+                </ul>
+            }
         </div>
     }
 </div>

@@ -7,27 +7,37 @@
         Communes du département {{ departmentCode() }}
     </h1>
 
-    <input type="text"
-           [value]="filterQuery()"
-           (input)="filterQuery.set($any($event.target).value)"
-           placeholder="Filtrer les communes..."
-           class="border border-gray-500 rounded px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-gray-300"
-           data-testid="municipality-filter"
-    />
+    @if (!loading()) {
+        <input type="text"
+               [value]="filterQuery()"
+               (input)="filterQuery.set($any($event.target).value)"
+               placeholder="Filtrer les communes..."
+               class="border border-gray-500 rounded px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-gray-300"
+               data-testid="municipality-filter"
+        />
 
-    <p class="text-gray-500 mb-4">{{ municipalities().length }} communes</p>
+        <p class="text-gray-500 mb-4">{{ municipalities().length }} communes</p>
+    }
+
 </div>
 
-<cdk-virtual-scroll-viewport itemSize="56" class="h-[calc(100vh-320px)] max-w-2xl mx-auto">
-    <div
-            *cdkVirtualFor="let municipality of municipalities(); trackBy: trackByCode"
-            class="p-4 bg-gray-50 rounded mb-2 hover:bg-gray-100 transition-colors duration-300 ease-in-out"
-    >
-        <span class="font-medium">{{ municipality.name }}</span>
-        @if (municipality.population) {
-            <span class="text-gray-500 text-sm ml-2">
-        ({{ municipality.population | number }} hab.)
-      </span>
+@if (loading()) {
+    <div class="max-w-2xl mx-auto px-4 space-y-2">
+        @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+            <div class="p-4 bg-gray-100 rounded animate-pulse h-14"></div>
         }
     </div>
-</cdk-virtual-scroll-viewport>
+} @else {
+    <cdk-virtual-scroll-viewport itemSize="56" class="h-[calc(100vh-320px)] max-w-2xl mx-auto">
+        <div *cdkVirtualFor="let municipality of municipalities(); trackBy: trackByCode"
+             class="p-4 bg-gray-50 rounded mb-2 hover:bg-gray-100 transition-colors"
+        >
+            <span class="font-medium">{{ municipality.name }}</span>
+            @if (municipality.population) {
+                <span class="text-gray-500 text-sm ml-2">
+                  ({{ municipality.population | number }} hab.)
+                </span>
+            }
+        </div>
+    </cdk-virtual-scroll-viewport>
+}

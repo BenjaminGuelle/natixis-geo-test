@@ -2,7 +2,7 @@ import { Component, inject, Signal, signal, WritableSignal } from '@angular/core
 import { GeoApiService } from '../../core/services/geo-api.service';
 import { RegionModel } from '../../core/domain/models/region.model';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { debounceTime, filter, of, switchMap } from 'rxjs';
+import { debounceTime, filter, of, switchMap, tap } from 'rxjs';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { InputSearch } from './input-search/input-search';
 import { DepartmentModel } from '../../core/domain/models/department.model';
@@ -22,6 +22,7 @@ export class RegionSearch {
   #router: Router = inject(Router);
 
   searchControl: FormControl<string | null> = new FormControl('');
+  loading: WritableSignal<boolean> = signal(false);
   selectedRegion: WritableSignal<RegionModel | null> = signal<RegionModel | null>(null);
 
   suggestions: Signal<RegionModel[]> = toSignal(
@@ -38,8 +39,14 @@ export class RegionSearch {
 
   departments: Signal<DepartmentModel[]> = toSignal(
     toObservable(this.selectedRegion).pipe(
-      filter((region: RegionModel | null): region is RegionModel => region !== null),
-      switchMap((region: RegionModel) => this.#geoService.getDepartmentsByRegion(region.code))
+      tap(() => this.loading.set(true)),
+      switchMap((region: RegionModel | null) =>
+        region
+          ? this.#geoService.getDepartmentsByRegion(region.code).pipe(
+            tap(() => this.loading.set(false))
+          )
+          : of([])
+      )
     ),
     { initialValue: [] }
   );

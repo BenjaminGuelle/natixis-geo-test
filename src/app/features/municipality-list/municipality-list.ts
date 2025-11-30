@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, WritableSignal, Signal } from '@angular/core';
 import { ActivatedRoute, ParamMap, RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { switchMap, map } from 'rxjs';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { switchMap, map, tap, filter } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { GeoApiService } from '../../core/services/geo-api.service';
@@ -18,6 +18,7 @@ export class MunicipalityList {
   #geoService: GeoApiService = inject(GeoApiService);
 
   filterQuery: WritableSignal<string> = signal('');
+  loading: WritableSignal<boolean> = signal(false);
 
   departmentCode: Signal<string> = toSignal(
     this.#route.paramMap.pipe(
@@ -26,12 +27,15 @@ export class MunicipalityList {
     { initialValue: '' }
   );
 
-  #allMunicipalities: Signal<MunicipalityModel[]> = toSignal(
-    this.#route.paramMap.pipe(
-      switchMap((params: ParamMap) => {
-        const code: string = params.get('code') ?? '';
-        return this.#geoService.getMunicipalitiesByDepartment(code);
-      })
+  #allMunicipalities = toSignal(
+    toObservable(this.departmentCode).pipe(
+      filter(Boolean),
+      tap(() => this.loading.set(true)),
+      switchMap((code: string) =>
+        this.#geoService.getMunicipalitiesByDepartment(code).pipe(
+          tap(() => this.loading.set(false))
+        )
+      )
     ),
     { initialValue: [] }
   );
