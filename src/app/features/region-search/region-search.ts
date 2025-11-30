@@ -6,6 +6,7 @@ import { debounceTime, filter, of, switchMap } from 'rxjs';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { InputSearch } from './input-search/input-search';
 import { DepartmentModel } from '../../core/domain/models/department.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'region-search',
@@ -18,6 +19,7 @@ import { DepartmentModel } from '../../core/domain/models/department.model';
 })
 export class RegionSearch {
   #geoService: GeoApiService = inject(GeoApiService);
+  #router: Router = inject(Router);
 
   searchControl: FormControl<string | null> = new FormControl('');
   selectedRegion: WritableSignal<RegionModel | null> = signal<RegionModel | null>(null);
@@ -56,5 +58,9 @@ export class RegionSearch {
   onSelectRegion(region: RegionModel): void {
     this.selectedRegion.set(region);
     this.searchControl.setValue(region.name, { emitEvent: false });
+  }
+
+  onSelectDepartment(department: DepartmentModel): void {
+    this.#router.navigate(['/departments', department.code, 'municipalities']);
   }
 }
