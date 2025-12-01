@@ -6,5 +6,6 @@ import { MunicipalityModel } from '../models/municipality.model';
 export interface GeoRepositoryInterface {
   searchRegions(query: string): Observable<RegionModel[]>;
   getDepartmentsByRegion(regionCode: string): Observable<DepartmentModel[]>;
+  getDepartmentByCode(code: string): Observable<DepartmentModel>;
   getMunicipalitiesByDepartment(departmentCode: string): Observable<MunicipalityModel[]>;
 }
